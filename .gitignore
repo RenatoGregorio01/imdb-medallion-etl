@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual Environment
+.venv/
+venv/
+env/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment variables
+.env
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# Data
+data/raw/
+data/bronze/
+data/silver/
+data/gold/
+
+# DuckDB
+*.duckdb
+*.db
+
+data/**
+!data/**/.gitkeep
