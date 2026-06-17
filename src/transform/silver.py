@@ -14,11 +14,50 @@ SILVER_FILE = Path(
 )
 
 
-def create_silver_layer() -> None:
+def normalize_genres(value: str) -> str:
+    """
+    Padroniza a coluna de gêneros.
+
+    Exemplos:
+    - "Action, Adventure" -> "Action,Adventure"
+    - "Action , Adventure" -> "Action,Adventure"
+    - None -> "Unknown"
+    """
+
+    if pd.isna(value):
+        return "Unknown"
+
+    genres = [
+        genre.strip()
+        for genre in value.split(",")
+    ]
+
+    return ",".join(genres)
+
+
+def create_silver_layer(
+    force_refresh: bool = False,
+) -> None:
     try:
         logger.info(
             "[SILVER] Iniciando camada Silver"
         )
+
+        if not BRONZE_FILE.exists():
+            raise FileNotFoundError(
+                f"Arquivo não encontrado: {BRONZE_FILE}"
+            )
+
+        # Idempotência
+        if (
+            SILVER_FILE.exists()
+            and not force_refresh
+        ):
+            logger.info(
+                "[SILVER] Arquivo já existe: {}",
+                SILVER_FILE
+            )
+            return
 
         df = pd.read_parquet(
             BRONZE_FILE
@@ -29,7 +68,9 @@ def create_silver_layer() -> None:
             len(df)
         )
 
-        # Remove IDs nulos
+        initial_count = len(df)
+
+        # Remove registros sem imdb_id
         df = df[
             df["imdb_id"].notna()
         ]
@@ -39,16 +80,14 @@ def create_silver_layer() -> None:
             subset=["imdb_id"]
         )
 
-        # Trata gêneros nulos
-        df["genres"] = (
-            df["genres"]
-            .fillna("Unknown")
+        # Padroniza gêneros
+        df["genres"] = df["genres"].apply(
+            normalize_genres
         )
 
         # Conversão de tipos
-        df["year"] = (
-            df["year"]
-            .astype("Int64")
+        df["year"] = df["year"].astype(
+            "Int64"
         )
 
         df["runtime_minutes"] = (
@@ -66,7 +105,7 @@ def create_silver_layer() -> None:
             .astype(float)
         )
 
-        # Valida ano
+        # Validação do ano
         df = df[
             df["year"].between(
                 1980,
@@ -74,7 +113,7 @@ def create_silver_layer() -> None:
             )
         ]
 
-        # Valida nota
+        # Validação da nota
         df = df[
             df["average_rating"].between(
                 0,
@@ -82,14 +121,20 @@ def create_silver_layer() -> None:
             )
         ]
 
-        # Valida URL
+        # Validação da URL
         df = df[
             df["imdb_url"].str.startswith(
                 "https://www.imdb.com/title/"
             )
         ]
 
-        # Metadado técnico
+        final_count = len(df)
+
+        logger.info(
+            "[SILVER] Registros removidos: {}",
+            initial_count - final_count
+        )
+
         df["_silver_timestamp"] = (
             datetime.now(
                 timezone.utc
@@ -101,6 +146,10 @@ def create_silver_layer() -> None:
             exist_ok=True
         )
 
+        logger.info(
+            "[SILVER] Salvando arquivo Parquet"
+        )
+
         df.to_parquet(
             SILVER_FILE,
             engine="pyarrow",
@@ -109,6 +158,11 @@ def create_silver_layer() -> None:
 
         logger.success(
             "[SILVER] Camada Silver criada com sucesso"
+        )
+
+        logger.info(
+            "[SILVER] Total de registros: {}",
+            len(df)
         )
 
     except Exception:
