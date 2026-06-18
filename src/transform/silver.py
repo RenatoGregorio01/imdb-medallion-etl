@@ -14,7 +14,7 @@ SILVER_FILE = Path(
 )
 
 
-def normalize_genres(value: str) -> str:
+def normalize_genres(value: str | None) -> str:
     """
     Padroniza a coluna de gêneros.
 
