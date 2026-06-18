@@ -4,6 +4,7 @@ duckdb
 kaggle
 python-dotenv
 pytest
+pytest-cov
 pydantic
 pydantic-settings
 loguru
