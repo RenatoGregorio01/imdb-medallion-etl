@@ -2,10 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-
-RAW_FILE = Path(
-    "data/raw/imdb_top_movies_1980_2026.csv"
-)
+RAW_FILE = Path("data/raw/imdb_top_movies_1980_2026.csv")
 
 
 def test_raw_file_exists() -> None:
@@ -36,4 +33,3 @@ def test_raw_expected_columns() -> None:
     }
 
     assert set(df.columns) == expected_columns
-    

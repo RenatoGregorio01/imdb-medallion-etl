@@ -3,9 +3,7 @@ import pandas as pd
 
 def test_genre_statistics_schema() -> None:
 
-    df = pd.read_parquet(
-        "data/gold/analytics/genre_statistics.parquet"
-    )
+    df = pd.read_parquet("data/gold/analytics/genre_statistics.parquet")
 
     expected = {
         "genre_name",
@@ -14,17 +12,12 @@ def test_genre_statistics_schema() -> None:
         "total_votes",
     }
 
-    assert (
-        set(df.columns)
-        == expected
-    )
+    assert set(df.columns) == expected
 
 
 def test_yearly_statistics_schema() -> None:
 
-    df = pd.read_parquet(
-        "data/gold/analytics/yearly_movie_statistics.parquet"
-    )
+    df = pd.read_parquet("data/gold/analytics/yearly_movie_statistics.parquet")
 
     expected = {
         "year",
@@ -34,8 +27,4 @@ def test_yearly_statistics_schema() -> None:
         "total_votes",
     }
 
-    assert (
-        set(df.columns)
-        == expected
-    )
-    
+    assert set(df.columns) == expected

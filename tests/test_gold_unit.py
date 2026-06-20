@@ -2,8 +2,6 @@ import pandas as pd
 
 from src.transform.gold import (
     create_bridge_movie_genre,
-    create_dim_genre,
-    create_dim_movie,
     create_fact_movie,
 )
 
@@ -39,19 +37,9 @@ def test_create_fact_movie() -> None:
 
 def test_create_bridge_movie_genre() -> None:
 
-    df = pd.DataFrame(
-        {
-            "genres": [
-                "Action,Drama"
-            ]
-        }
-    )
+    df = pd.DataFrame({"genres": ["Action,Drama"]})
 
-    dim_movie = pd.DataFrame(
-        {
-            "movie_key": [1]
-        }
-    )
+    dim_movie = pd.DataFrame({"movie_key": [1]})
 
     dim_genre = pd.DataFrame(
         {
@@ -71,7 +59,4 @@ def test_create_bridge_movie_genre() -> None:
 
     assert len(result) == 2
 
-    assert set(
-        result["genre_key"]
-    ) == {1, 2}
-    
+    assert set(result["genre_key"]) == {1, 2}

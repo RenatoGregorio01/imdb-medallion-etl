@@ -11,6 +11,7 @@ ANALYTICS_PATH = GOLD_PATH / "analytics"
 GENRE_STATS_FILE = ANALYTICS_PATH / "genre_statistics.parquet"
 YEARLY_STATS_FILE = ANALYTICS_PATH / "yearly_movie_statistics.parquet"
 
+
 def create_analytics_layer(force_refresh: bool = False, **kwargs) -> None:
     """
     Gera tabelas analíticas agregadas utilizando DuckDB para leitura otimizada de Parquet.
@@ -22,16 +23,19 @@ def create_analytics_layer(force_refresh: bool = False, **kwargs) -> None:
         ANALYTICS_PATH.mkdir(parents=True, exist_ok=True)
 
         # Idempotência
-        if GENRE_STATS_FILE.exists() and YEARLY_STATS_FILE.exists() and not force_refresh:
+        if (
+            GENRE_STATS_FILE.exists()
+            and YEARLY_STATS_FILE.exists()
+            and not force_refresh
+        ):
             logger.info("[ANALYTICS] Arquivos analíticos já existem. Pulando.")
             return
 
         # Conexão com DuckDB
-        conn = duckdb.connect(database=':memory:')
+        conn = duckdb.connect(database=":memory:")
 
         logger.info("[ANALYTICS] Gerando estatísticas por gênero")
-        conn.execute(
-            f"""
+        conn.execute(f"""
             COPY (
                 SELECT
                     g.genre_name,
@@ -44,12 +48,10 @@ def create_analytics_layer(force_refresh: bool = False, **kwargs) -> None:
                 GROUP BY g.genre_name
                 ORDER BY avg_rating DESC
             ) TO '{GENRE_STATS_FILE}' (FORMAT PARQUET)
-            """
-        )
+            """)
 
         logger.info("[ANALYTICS] Gerando estatísticas por ano")
-        conn.execute(
-            f"""
+        conn.execute(f"""
             COPY (
                 SELECT
                     d.year,
@@ -62,8 +64,7 @@ def create_analytics_layer(force_refresh: bool = False, **kwargs) -> None:
                 GROUP BY d.year
                 ORDER BY d.year
             ) TO '{YEARLY_STATS_FILE}' (FORMAT PARQUET)
-            """
-        )
+            """)
 
         conn.close()
         logger.success("[ANALYTICS] Camada analítica gerada com sucesso")
@@ -71,4 +72,3 @@ def create_analytics_layer(force_refresh: bool = False, **kwargs) -> None:
     except Exception:
         logger.exception("[ANALYTICS] Falha ao processar camada analítica")
         raise
-    

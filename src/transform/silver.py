@@ -4,11 +4,11 @@ from pathlib import Path
 import pandas as pd
 from src.utils.logger import logger
 
-
 BASE_DATA_DIR = Path(os.getenv("AIRFLOW_DATA_DIR", "data"))
 
 BRONZE_FILE = BASE_DATA_DIR / "bronze/movies_raw.parquet"
 SILVER_FILE = BASE_DATA_DIR / "silver/movies_clean.parquet"
+
 
 def normalize_genres(value: str | None) -> str:
     """
@@ -16,14 +16,12 @@ def normalize_genres(value: str | None) -> str:
     """
     if pd.isna(value) or value == "":
         return "Unknown"
-    
+
     genres = [genre.strip() for genre in str(value).split(",")]
     return ",".join(genres)
 
-def create_silver_layer(
-    force_refresh: bool = False, 
-    **kwargs
-) -> None:
+
+def create_silver_layer(force_refresh: bool = False, **kwargs) -> None:
     """
     Cria a camada Silver: limpeza, padronização e validação de dados.
     """
@@ -38,7 +36,9 @@ def create_silver_layer(
 
         # Idempotência
         if SILVER_FILE.exists() and not force_refresh:
-            logger.info("[SILVER] Arquivo já existe em {}. Pulando processamento.", SILVER_FILE)
+            logger.info(
+                "[SILVER] Arquivo já existe em {}. Pulando processamento.", SILVER_FILE
+            )
             return
 
         logger.info("[SILVER] Lendo arquivo Bronze: {}", BRONZE_FILE)
@@ -49,10 +49,10 @@ def create_silver_layer(
         # 1. Limpeza básica
         df = df[df["imdb_id"].notna()]
         df = df.drop_duplicates(subset=["imdb_id"])
-        
+
         # 2. Padronização
         df["genres"] = df["genres"].apply(normalize_genres)
-        
+
         # 3. Conversão de tipos
         df["year"] = df["year"].astype("Int64")
         df["runtime_minutes"] = df["runtime_minutes"].astype("Int64")
@@ -65,19 +65,19 @@ def create_silver_layer(
         df = df[df["imdb_url"].str.startswith("https://www.imdb.com/title/", na=False)]
 
         final_count = len(df)
-        logger.info("[SILVER] Registros removidos após limpeza: {}", initial_count - final_count)
+        logger.info(
+            "[SILVER] Registros removidos após limpeza: {}", initial_count - final_count
+        )
 
         # 5. Metadados de processamento
         df["_silver_timestamp"] = datetime.now(timezone.utc)
 
         logger.info("[SILVER] Salvando arquivo Parquet em: {}", SILVER_FILE)
-        df.to_parquet(
-            SILVER_FILE,
-            engine="pyarrow",
-            index=False
-        )
+        df.to_parquet(SILVER_FILE, engine="pyarrow", index=False)
 
-        logger.success("[SILVER] Camada Silver criada com sucesso. Total final: {}", final_count)
+        logger.success(
+            "[SILVER] Camada Silver criada com sucesso. Total final: {}", final_count
+        )
 
     except Exception:
         logger.exception("[SILVER] Erro crítico ao processar camada Silver")

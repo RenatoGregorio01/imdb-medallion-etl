@@ -9,9 +9,7 @@ from src.transform.gold import (
 
 def test_create_gold_layer() -> None:
 
-    create_gold_layer(
-        force_refresh=True
-    )
+    create_gold_layer(force_refresh=True)
 
     assert DIM_MOVIE_FILE.exists()
 
@@ -27,4 +25,3 @@ def test_create_gold_layer_idempotent() -> None:
     create_gold_layer()
 
     assert DIM_MOVIE_FILE.exists()
-    

@@ -24,11 +24,6 @@ def test_main_pipeline(
 
     mock_silver.assert_called_once()
 
-    mock_gold.assert_called_once_with(
-        force_refresh=True
-    )
+    mock_gold.assert_called_once_with(force_refresh=True)
 
-    mock_analytics.assert_called_once_with(
-        force_refresh=True
-    )
-    
+    mock_analytics.assert_called_once_with(force_refresh=True)

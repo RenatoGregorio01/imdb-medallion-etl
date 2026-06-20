@@ -39,7 +39,9 @@ def create_fact_movie(df: pd.DataFrame, dim_movie: pd.DataFrame) -> pd.DataFrame
 def create_bridge_movie_genre(
     df: pd.DataFrame, dim_movie: pd.DataFrame, dim_genre: pd.DataFrame
 ) -> pd.DataFrame:
-    genre_lookup = dict(zip(dim_genre["genre_name"], dim_genre["genre_key"], strict=False))
+    genre_lookup = dict(
+        zip(dim_genre["genre_name"], dim_genre["genre_key"], strict=False)
+    )
     bridge_rows = []
 
     for movie_key, genres in zip(dim_movie["movie_key"], df["genres"], strict=False):
@@ -91,8 +93,11 @@ def create_gold_layer(force_refresh: bool = False, **kwargs) -> None:
 
         logger.success("[GOLD] Camada Gold criada com sucesso")
         logger.info(
-            "[GOLD] Resumo: Filmes={}, Gêneros={}, Fatos={}, Relacionamentos={}", 
-            len(dim_movie), len(dim_genre), len(fact_movie), len(bridge_movie_genre)
+            "[GOLD] Resumo: Filmes={}, Gêneros={}, Fatos={}, Relacionamentos={}",
+            len(dim_movie),
+            len(dim_genre),
+            len(fact_movie),
+            len(bridge_movie_genre),
         )
 
     except Exception:

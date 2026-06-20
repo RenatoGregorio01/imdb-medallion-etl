@@ -10,11 +10,7 @@ logger.add(
     level="INFO",
     rotation="10 MB",
     retention="30 days",
-    format=(
-        "{time:YYYY-MM-DD HH:mm:ss} | "
-        "{level} | "
-        "{message}"
-    ),
+    format=("{time:YYYY-MM-DD HH:mm:ss} | " "{level} | " "{message}"),
 )
 
 __all__ = ["logger"]
