@@ -1,46 +1,38 @@
+import os
 from datetime import datetime, timezone
 from pathlib import Path
-
 import pandas as pd
-
 from src.utils.logger import logger
 
-RAW_FILE = Path(
-    "data/raw/imdb_top_movies_1980_2026.csv"
-)
 
-BRONZE_FILE = Path(
-    "data/bronze/movies_raw.parquet"
-)
+BASE_DATA_DIR = Path(os.getenv("AIRFLOW_DATA_DIR", "data"))
 
+RAW_FILE = BASE_DATA_DIR / "raw/imdb_top_movies_1980_2026.csv"
+BRONZE_FILE = BASE_DATA_DIR / "bronze/movies_raw.parquet"
 
 def create_bronze_layer(
-    force_refresh: bool = False,
+    force_refresh: bool = False, 
+    **kwargs
 ) -> None:
+    """
+    Cria a camada Bronze transformando o CSV de origem em Parquet.
+    """
     try:
-        logger.info(
-            "[BRONZE] Iniciando geração da camada Bronze"
-        )
+        logger.info("[BRONZE] Iniciando geração da camada Bronze")
+
+        # Garantir que os diretórios existam antes de qualquer operação
+        RAW_FILE.parent.mkdir(parents=True, exist_ok=True)
+        BRONZE_FILE.parent.mkdir(parents=True, exist_ok=True)
 
         if not RAW_FILE.exists():
-            raise FileNotFoundError(
-                f"Arquivo não encontrado: {RAW_FILE}"
-            )
+            raise FileNotFoundError(f"Arquivo não encontrado: {RAW_FILE}")
 
-        # Idempotência
-        if (
-            BRONZE_FILE.exists()
-            and not force_refresh
-        ):
-            logger.info(
-                "[BRONZE] Arquivo já existe: {}",
-                BRONZE_FILE,
-            )
+        # Idempotência: verifica se o arquivo já existe e se não deve ser forçado o refresh
+        if BRONZE_FILE.exists() and not force_refresh:
+            logger.info("[BRONZE] Arquivo já existe: {}. Pulando processamento.", BRONZE_FILE)
             return
 
-        logger.info(
-            "[BRONZE] Lendo arquivo CSV"
-        )
+        logger.info("[BRONZE] Lendo arquivo CSV: {}", RAW_FILE)
 
         df = pd.read_csv(
             RAW_FILE,
@@ -53,26 +45,13 @@ def create_bronze_layer(
             },
         )
 
-        logger.info(
-            "[BRONZE] {} registros carregados",
-            len(df)
-        )
+        logger.info("[BRONZE] {} registros carregados", len(df))
 
-        # Metadados técnicos
-        df["_ingestion_timestamp"] = (
-            datetime.now(timezone.utc)
-        )
-
+        # Adição de Metadados técnicos
+        df["_ingestion_timestamp"] = datetime.now(timezone.utc)
         df["_source"] = "kaggle"
 
-        BRONZE_FILE.parent.mkdir(
-            parents=True,
-            exist_ok=True,
-        )
-
-        logger.info(
-            "[BRONZE] Salvando arquivo Parquet"
-        )
+        logger.info("[BRONZE] Salvando arquivo Parquet em: {}", BRONZE_FILE)
 
         df.to_parquet(
             BRONZE_FILE,
@@ -80,13 +59,8 @@ def create_bronze_layer(
             index=False,
         )
 
-        logger.success(
-            "[BRONZE] Camada Bronze criada com sucesso"
-        )
+        logger.success("[BRONZE] Camada Bronze criada com sucesso")
 
     except Exception:
-        logger.exception(
-            "[BRONZE] Erro ao gerar camada Bronze"
-        )
+        logger.exception("[BRONZE] Erro crítico ao gerar camada Bronze")
         raise
-    
