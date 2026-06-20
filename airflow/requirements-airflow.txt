@@ -1,0 +1,8 @@
+pandas
+pyarrow
+duckdb
+kaggle
+python-dotenv
+pydantic
+pydantic-settings
+loguru
