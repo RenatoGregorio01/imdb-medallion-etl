@@ -4,16 +4,13 @@ from pathlib import Path
 import pandas as pd
 from src.utils.logger import logger
 
-
 BASE_DATA_DIR = Path(os.getenv("AIRFLOW_DATA_DIR", "data"))
 
 RAW_FILE = BASE_DATA_DIR / "raw/imdb_top_movies_1980_2026.csv"
 BRONZE_FILE = BASE_DATA_DIR / "bronze/movies_raw.parquet"
 
-def create_bronze_layer(
-    force_refresh: bool = False, 
-    **kwargs
-) -> None:
+
+def create_bronze_layer(force_refresh: bool = False, **kwargs) -> None:
     """
     Cria a camada Bronze transformando o CSV de origem em Parquet.
     """
@@ -29,7 +26,9 @@ def create_bronze_layer(
 
         # Idempotência: verifica se o arquivo já existe e se não deve ser forçado o refresh
         if BRONZE_FILE.exists() and not force_refresh:
-            logger.info("[BRONZE] Arquivo já existe: {}. Pulando processamento.", BRONZE_FILE)
+            logger.info(
+                "[BRONZE] Arquivo já existe: {}. Pulando processamento.", BRONZE_FILE
+            )
             return
 
         logger.info("[BRONZE] Lendo arquivo CSV: {}", RAW_FILE)

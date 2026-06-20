@@ -24,12 +24,7 @@ def test_genre_statistics_columns(
         "total_votes",
     }
 
-    assert (
-        set(
-            genre_statistics_df.columns
-        )
-        == expected
-    )
+    assert set(genre_statistics_df.columns) == expected
 
 
 def test_yearly_statistics_columns(
@@ -44,10 +39,4 @@ def test_yearly_statistics_columns(
         "total_votes",
     }
 
-    assert (
-        set(
-            yearly_movie_statistics_df.columns
-        )
-        == expected
-    )
-    
+    assert set(yearly_movie_statistics_df.columns) == expected

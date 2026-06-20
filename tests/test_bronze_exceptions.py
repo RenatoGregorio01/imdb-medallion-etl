@@ -14,10 +14,5 @@ from src.transform.bronze import (
 )
 def test_bronze_file_not_found() -> None:
 
-    with pytest.raises(
-        FileNotFoundError
-    ):
-        create_bronze_layer(
-            force_refresh=True
-        )
-        
+    with pytest.raises(FileNotFoundError):
+        create_bronze_layer(force_refresh=True)

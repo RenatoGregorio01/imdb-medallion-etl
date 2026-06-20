@@ -8,9 +8,7 @@ from src.transform.bronze import (
 
 def test_create_bronze_layer() -> None:
 
-    create_bronze_layer(
-        force_refresh=True
-    )
+    create_bronze_layer(force_refresh=True)
 
     assert BRONZE_FILE.exists()
 
@@ -19,7 +17,4 @@ def test_create_bronze_layer_idempotent() -> None:
 
     create_bronze_layer()
 
-    assert Path(
-        BRONZE_FILE
-    ).exists()
-    
+    assert Path(BRONZE_FILE).exists()
