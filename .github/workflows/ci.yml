@@ -44,7 +44,7 @@ jobs:
 
       - name: Run ETL Pipeline
         run: |
-          python -m src.extract.download
+          python -m src.extract.download_dataset
           python -m src.transform.bronze
           python -m src.transform.silver
           python -m src.transform.gold
