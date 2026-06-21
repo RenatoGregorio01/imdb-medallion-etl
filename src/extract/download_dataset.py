@@ -1,6 +1,6 @@
 from pathlib import Path
 from src.utils.logger import logger
-from src.utils.oci_utils import upload_to_oci 
+from src.utils.oci_utils import upload_to_oci
 
 DATASET = "elvisbui/imdb-top-movies-1980-2026"
 RAW_PATH = Path("data/raw")
@@ -28,10 +28,7 @@ def download_dataset() -> None:
 
         # --- INTEGRAÇÃO OCI ---
         logger.info("[EXTRACT] Iniciando backup da camada Bronze na OCI")
-        upload_to_oci(
-            file_path=str(csv_file), 
-            object_name=f"bronze/{FILE_NAME}"
-        )
+        upload_to_oci(file_path=str(csv_file), object_name=f"bronze/{FILE_NAME}")
 
     except Exception:
         logger.exception("[EXTRACT] Erro no fluxo de extração/upload Bronze")

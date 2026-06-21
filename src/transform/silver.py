@@ -38,7 +38,7 @@ def create_silver_layer(force_refresh: bool = False, **kwargs) -> None:
         if not (SILVER_FILE.exists() and not force_refresh):
             logger.info("[SILVER] Lendo arquivo Bronze: {}", BRONZE_FILE)
             df = pd.read_parquet(BRONZE_FILE)
-            
+
             # 1. Limpeza básica
             df = df[df["imdb_id"].notna()]
             df = df.drop_duplicates(subset=["imdb_id"])
@@ -55,7 +55,9 @@ def create_silver_layer(force_refresh: bool = False, **kwargs) -> None:
             # 4. Validações de negócio
             df = df[df["year"].between(1980, 2026)]
             df = df[df["average_rating"].between(0, 10)]
-            df = df[df["imdb_url"].str.startswith("https://www.imdb.com/title/", na=False)]
+            df = df[
+                df["imdb_url"].str.startswith("https://www.imdb.com/title/", na=False)
+            ]
 
             # 5. Metadados
             df["_silver_timestamp"] = datetime.now(timezone.utc)
@@ -69,11 +71,9 @@ def create_silver_layer(force_refresh: bool = False, **kwargs) -> None:
         # --- INTEGRAÇÃO OCI ---
         logger.info("[SILVER] Enviando arquivo para a camada Silver na OCI")
         upload_to_oci(
-            file_path=str(SILVER_FILE),
-            object_name=f"silver/{SILVER_FILE.name}"
+            file_path=str(SILVER_FILE), object_name=f"silver/{SILVER_FILE.name}"
         )
 
     except Exception:
         logger.exception("[SILVER] Erro crítico ao processar camada Silver")
         raise
-    
