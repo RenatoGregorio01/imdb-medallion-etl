@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 import pandas as pd
 from src.utils.logger import logger
-from src.utils.oci_utils import upload_to_oci 
+from src.utils.oci_utils import upload_to_oci
 
 BASE_DATA_DIR = Path(os.getenv("AIRFLOW_DATA_DIR", "data"))
 RAW_FILE = BASE_DATA_DIR / "raw/imdb_top_movies_1980_2026.csv"
@@ -47,8 +47,7 @@ def create_bronze_layer(force_refresh: bool = False, **kwargs) -> None:
         # --- INTEGRAÇÃO OCI ---
         logger.info("[BRONZE] Enviando arquivo para a camada Bronze na OCI")
         upload_to_oci(
-            file_path=str(BRONZE_FILE),
-            object_name=f"bronze/{BRONZE_FILE.name}"
+            file_path=str(BRONZE_FILE), object_name=f"bronze/{BRONZE_FILE.name}"
         )
 
     except Exception:

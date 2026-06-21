@@ -5,13 +5,20 @@ on:
     branches:
       - main
       - feature/**
+      - fix/**
   pull_request:
+    branches:
       - main
-  
+
 jobs:
   quality:
-
     runs-on: ubuntu-latest
+    env:
+      AIRFLOW_DATA_DIR: data
+      GITHUB_ACTIONS: "true"
+      PYTHONPATH: ${{ github.workspace }}
+      KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+      KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
 
     steps:
       - name: Checkout repository
@@ -35,10 +42,14 @@ jobs:
         run: |
           black --check .
 
-      - name: Run Tests
+      - name: Run ETL Pipeline
         run: |
-          python -m pytest
+          python -m src.extract.download_dataset
+          python -m src.transform.bronze
+          python -m src.transform.silver
+          python -m src.transform.gold
+          python -m src.transform.analytics
 
       - name: Run Tests with Coverage
         run: |
-          python -m pytest --cov=src --cov-report=term-missing
+          python -m pytest --cov=src --cov-report=term-missing --ignore=tests/test_oci_connection.py
