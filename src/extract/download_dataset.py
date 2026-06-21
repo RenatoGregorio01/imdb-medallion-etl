@@ -1,9 +1,10 @@
 from pathlib import Path
-
 from src.utils.logger import logger
+from src.utils.oci_utils import upload_to_oci 
 
 DATASET = "elvisbui/imdb-top-movies-1980-2026"
 RAW_PATH = Path("data/raw")
+FILE_NAME = "imdb_top_movies_1980_2026.csv"
 
 
 def download_dataset() -> None:
@@ -11,36 +12,29 @@ def download_dataset() -> None:
         logger.info("[EXTRACT] Iniciando download do dataset")
 
         RAW_PATH.mkdir(parents=True, exist_ok=True)
+        csv_file = RAW_PATH / FILE_NAME
 
-        csv_file = RAW_PATH / "imdb_top_movies_1980_2026.csv"
+        if not csv_file.exists():
+            logger.info("[EXTRACT] Importando cliente Kaggle")
+            from kaggle.api.kaggle_api_extended import KaggleApi
 
-        if csv_file.exists():
-            logger.info("[EXTRACT] Dataset já existe: {}", csv_file)
-            return
+            logger.info("[EXTRACT] Autenticando e baixando dataset: {}", DATASET)
+            api = KaggleApi()
+            api.authenticate()
+            api.dataset_download_files(DATASET, path=RAW_PATH, unzip=True)
+            logger.success("[EXTRACT] Download concluído com sucesso")
+        else:
+            logger.info("[EXTRACT] Dataset já existe localmente")
 
-        logger.info("[EXTRACT] Importando cliente Kaggle")
-
-        from kaggle.api.kaggle_api_extended import (
-            KaggleApi,
+        # --- INTEGRAÇÃO OCI ---
+        logger.info("[EXTRACT] Iniciando backup da camada Bronze na OCI")
+        upload_to_oci(
+            file_path=str(csv_file), 
+            object_name=f"bronze/{FILE_NAME}"
         )
-
-        logger.info("[EXTRACT] Autenticando na API do Kaggle")
-
-        api = KaggleApi()
-        api.authenticate()
-
-        logger.info("[EXTRACT] Baixando dataset: {}", DATASET)
-
-        api.dataset_download_files(
-            DATASET,
-            path=RAW_PATH,
-            unzip=True,
-        )
-
-        logger.success("[EXTRACT] Download concluído com sucesso")
 
     except Exception:
-        logger.exception("[EXTRACT] Erro ao realizar download do dataset")
+        logger.exception("[EXTRACT] Erro no fluxo de extração/upload Bronze")
         raise
 
 

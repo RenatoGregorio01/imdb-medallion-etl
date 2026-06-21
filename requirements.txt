@@ -10,3 +10,4 @@ pydantic-settings
 loguru
 ruff
 black
+oci
