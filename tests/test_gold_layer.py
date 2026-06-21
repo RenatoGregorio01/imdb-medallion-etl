@@ -1,27 +1,17 @@
-from src.transform.gold import (
-    BRIDGE_FILE,
-    DIM_GENRE_FILE,
-    DIM_MOVIE_FILE,
-    FACT_MOVIE_FILE,
-    create_gold_layer,
-)
+from src.transform.gold import GOLD_FILES, create_gold_layer
 
 
 def test_create_gold_layer() -> None:
-
     create_gold_layer(force_refresh=True)
 
-    assert DIM_MOVIE_FILE.exists()
-
-    assert DIM_GENRE_FILE.exists()
-
-    assert FACT_MOVIE_FILE.exists()
-
-    assert BRIDGE_FILE.exists()
+    assert GOLD_FILES["dim_movie.parquet"].exists()
+    assert GOLD_FILES["dim_genre.parquet"].exists()
+    assert GOLD_FILES["fact_movie.parquet"].exists()
+    assert GOLD_FILES["bridge_movie_genre.parquet"].exists()
 
 
 def test_create_gold_layer_idempotent() -> None:
-
     create_gold_layer()
 
-    assert DIM_MOVIE_FILE.exists()
+    # Verifica se pelo menos o arquivo principal foi criado
+    assert GOLD_FILES["dim_movie.parquet"].exists()
