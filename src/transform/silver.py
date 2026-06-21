@@ -38,7 +38,6 @@ def create_silver_layer(force_refresh: bool = False, **kwargs) -> None:
         if not (SILVER_FILE.exists() and not force_refresh):
             logger.info("[SILVER] Lendo arquivo Bronze: {}", BRONZE_FILE)
             df = pd.read_parquet(BRONZE_FILE)
-            initial_count = len(df)
             
             # 1. Limpeza básica
             df = df[df["imdb_id"].notna()]
@@ -77,3 +76,4 @@ def create_silver_layer(force_refresh: bool = False, **kwargs) -> None:
     except Exception:
         logger.exception("[SILVER] Erro crítico ao processar camada Silver")
         raise
+    
