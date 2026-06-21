@@ -9,10 +9,13 @@ on:
   pull_request:
     branches:
       - main
-  
+
 jobs:
   quality:
     runs-on: ubuntu-latest
+    env:
+      AIRFLOW_DATA_DIR: data
+      GITHUB_ACTIONS: "true"
 
     steps:
       - name: Checkout repository
@@ -36,12 +39,18 @@ jobs:
         run: |
           black --check .
 
-      - name: Run Tests
-        # O --ignore evita que o teste de conexão OCI falhe no GitHub Actions
+      - name: Run ETL Pipeline
         run: |
-          python -m pytest --ignore=tests/test_oci_connection.py
+          mkdir -p data/raw
+          
+          echo "imdb_id,title,year,average_rating,num_votes,genres,imdb_url" > data/raw/imdb_top_movies_1980_2026.csv
+          echo "tt01,Dummy,2020,8.0,10,Action,https://www.imdb.com/title/tt01" >> data/raw/imdb_top_movies_1980_2026.csv
+        
+          python -m src.transform.bronze
+          python -m src.transform.silver
+          python -m src.transform.gold
+          python -m src.transform.analytics
 
       - name: Run Tests with Coverage
-        # Ignora o teste de conexão aqui também para manter o relatório consistente
         run: |
           python -m pytest --cov=src --cov-report=term-missing --ignore=tests/test_oci_connection.py
