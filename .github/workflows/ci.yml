@@ -16,6 +16,7 @@ jobs:
     env:
       AIRFLOW_DATA_DIR: data
       GITHUB_ACTIONS: "true"
+      PYTHONPATH: ${{ github.workspace }}
       KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
       KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
 
