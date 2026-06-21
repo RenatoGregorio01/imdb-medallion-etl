@@ -16,6 +16,8 @@ jobs:
     env:
       AIRFLOW_DATA_DIR: data
       GITHUB_ACTIONS: "true"
+      KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+      KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
 
     steps:
       - name: Checkout repository
@@ -41,11 +43,7 @@ jobs:
 
       - name: Run ETL Pipeline
         run: |
-          mkdir -p data/raw
-          
-          echo "imdb_id,title,year,average_rating,num_votes,genres,imdb_url" > data/raw/imdb_top_movies_1980_2026.csv
-          echo "tt01,Dummy,2020,8.0,10,Action,https://www.imdb.com/title/tt01" >> data/raw/imdb_top_movies_1980_2026.csv
-        
+          python -m src.extract.download
           python -m src.transform.bronze
           python -m src.transform.silver
           python -m src.transform.gold

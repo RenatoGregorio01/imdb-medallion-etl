@@ -94,3 +94,7 @@ def create_gold_layer(force_refresh: bool = False, **kwargs) -> None:
     except Exception:
         logger.exception("[GOLD] Erro crítico na camada Gold")
         raise
+
+
+if __name__ == "__main__":
+    create_gold_layer()

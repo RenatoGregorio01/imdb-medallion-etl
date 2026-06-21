@@ -60,3 +60,7 @@ def create_analytics_layer(force_refresh: bool = False, **kwargs) -> None:
     except Exception:
         logger.exception("[ANALYTICS] Falha ao processar camada analítica")
         raise
+
+
+if __name__ == "__main__":
+    create_analytics_layer()

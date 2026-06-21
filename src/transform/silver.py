@@ -34,10 +34,22 @@ def create_silver_layer(force_refresh: bool = False, **kwargs) -> None:
         if not BRONZE_FILE.exists():
             raise FileNotFoundError(f"Arquivo Bronze não encontrado em: {BRONZE_FILE}")
 
-        # Idempotência
-        if not (SILVER_FILE.exists() and not force_refresh):
+        # Idempotência: processa se for force_refresh ou se o arquivo não existir
+        if force_refresh or not SILVER_FILE.exists():
             logger.info("[SILVER] Lendo arquivo Bronze: {}", BRONZE_FILE)
             df = pd.read_parquet(BRONZE_FILE)
+
+            # Limpeza defensiva dos nomes das colunas (remove espaços e espaços ocultos)
+            df.columns = df.columns.str.strip()
+
+            # Verificação crítica da coluna antes de processar
+            if "runtime_minutes" not in df.columns:
+                logger.error(
+                    f"Erro: Coluna 'runtime_minutes' ausente. Colunas encontradas: {df.columns.tolist()}"
+                )
+                raise KeyError(
+                    "A coluna 'runtime_minutes' não foi encontrada no arquivo Bronze."
+                )
 
             # 1. Limpeza básica
             df = df[df["imdb_id"].notna()]
@@ -77,3 +89,7 @@ def create_silver_layer(force_refresh: bool = False, **kwargs) -> None:
     except Exception:
         logger.exception("[SILVER] Erro crítico ao processar camada Silver")
         raise
+
+
+if __name__ == "__main__":
+    create_silver_layer()
