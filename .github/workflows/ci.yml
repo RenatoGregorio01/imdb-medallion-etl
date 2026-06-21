@@ -5,12 +5,13 @@ on:
     branches:
       - main
       - feature/**
+      - fix/**
   pull_request:
+    branches:
       - main
   
 jobs:
   quality:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -36,9 +37,11 @@ jobs:
           black --check .
 
       - name: Run Tests
+        # O --ignore evita que o teste de conexão OCI falhe no GitHub Actions
         run: |
-          python -m pytest
+          python -m pytest --ignore=tests/test_oci_connection.py
 
       - name: Run Tests with Coverage
+        # Ignora o teste de conexão aqui também para manter o relatório consistente
         run: |
-          python -m pytest --cov=src --cov-report=term-missing
+          python -m pytest --cov=src --cov-report=term-missing --ignore=tests/test_oci_connection.py
